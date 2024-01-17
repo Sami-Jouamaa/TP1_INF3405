@@ -1,5 +1,5 @@
 package Client;
-
+import Verificateur.Verificateur;
 import java.io.DataInputStream;
 import java.util.Scanner;
 import java.io.DataOutputStream;
@@ -7,19 +7,23 @@ import java.net.Socket;
 
 public class Client {
 	private static Socket socket;
+	private static String serverAddress = "127.0.0.1";
+	private static int serverPort = 5000;
+	
 	public static void main(String[] args) throws Exception{
 		//Adresse et port du serveur
-		String serverAddress = "127.0.0.1";
-		int port = 5000;
+
+		serverAddress = Verificateur.askStartAddress();
+		serverPort = Verificateur.askStartPort();
 		
-		//Création d'une nouvelle connexion avec le serveur
+		//CrÃ©ation d'une nouvelle connexion avec le serveur
 		socket = new Socket(serverAddress, port);
-		System.out.format("Serveur lancé sur [%s:%d]", serverAddress, port);
+		System.out.format("Serveur lancÃ© sur [%s:%d]", serverAddress, port);
 		
-		//Création d'un canal entrant pour recevoir les messages envoyés par le serveur
+		//CrÃ©ation d'un canal entrant pour recevoir les messages envoyÃ©s par le serveur
 		DataInputStream in = new DataInputStream(socket.getInputStream());
 		
-		DataOutputStream out = new DataOutputStream(socket.getOutputStream()); //Création de canal d'envoi
+		DataOutputStream out = new DataOutputStream(socket.getOutputStream()); //CrÃ©ation de canal d'envoi
 		
 		Scanner scanner = new Scanner(System.in);
 		System.out.println("Enter the message you want to send to the server:");
@@ -27,7 +31,7 @@ public class Client {
 		
 		out.writeUTF(userMessage); //Envoi de message
 		
-		//Attente de la réception d'un message envoyé par le serveur sur le canal
+		//Attente de la rÃ©ception d'un message envoyÃ© par le serveur sur le canal
 		String helloMessageFromServer = in.readUTF();
 		System.out.println(helloMessageFromServer);
 		
