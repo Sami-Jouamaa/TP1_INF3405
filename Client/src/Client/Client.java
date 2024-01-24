@@ -4,26 +4,37 @@ import java.io.DataInputStream;
 import java.util.Scanner;
 import java.io.DataOutputStream;
 import java.net.Socket;
+import java.util.ArrayList;
 
-public class Client {
+public class Client extends Verificateur {
 	private static Socket socket;
 	private static String serverAddress = "127.0.0.1";
 	private static int serverPort = 5000;
+	private static ArrayList<String> infoConnections = new ArrayList<>();
 	
 	public static void main(String[] args) throws Exception{
 		//Adresse et port du serveur
 
 		serverAddress = Verificateur.askStartAddress();
 		serverPort = Verificateur.askStartPort();
+		socket = new Socket(serverAddress, serverPort);
+		
+		infoConnections = Verificateur.askLoginInfo();
+		
+		DataOutputStream out = new DataOutputStream(socket.getOutputStream()); //Création de canal d'envoi
+		
+		out.writeUTF(infoConnections.get(0));
+		out.writeUTF(infoConnections.get(1));
+		
 		
 		//Création d'une nouvelle connexion avec le serveur
-		socket = new Socket(serverAddress, port);
-		System.out.format("Serveur lancé sur [%s:%d]", serverAddress, port);
+		
+		System.out.format("Serveur lancé sur [%s:%d]", serverAddress, serverPort);
 		
 		//Création d'un canal entrant pour recevoir les messages envoyés par le serveur
 		DataInputStream in = new DataInputStream(socket.getInputStream());
 		
-		DataOutputStream out = new DataOutputStream(socket.getOutputStream()); //Création de canal d'envoi
+		
 		
 		Scanner scanner = new Scanner(System.in);
 		System.out.println("Enter the message you want to send to the server:");
@@ -38,5 +49,6 @@ public class Client {
 		//fermeture de la connexion avec le serveur
 		socket.close();
 		scanner.close();
+		
 	}
 }
