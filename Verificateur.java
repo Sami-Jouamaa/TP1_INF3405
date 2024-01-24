@@ -1,6 +1,8 @@
 package Verificateur;
 
 import java.util.Scanner;
+import java.util.ArrayList;
+import java.util.*;
 
 public class Verificateur {
 	public static String askStartAddress()
@@ -62,7 +64,7 @@ public class Verificateur {
 		int portServeur = 0;
 		Scanner scanner = new Scanner(System.in);
 		do {
-			System.out.println("Entrez le port d'écoute du poste sur laquelle s'effectue le serveur:");
+			System.out.println("Entrez le port d'Ã©coute du poste sur laquelle s'effectue le serveur:");
 			
 			
 			String portServeurEntre = scanner.nextLine();
@@ -74,4 +76,48 @@ public class Verificateur {
 		return portServeur;
 
 	}
+	
+	public static ArrayList<String> askLoginInfo()
+	{
+		ArrayList<String> userNamePassword = new ArrayList<>();
+		
+		Scanner scanner = new Scanner(System.in);
+		System.out.println("Please enter your username: ");
+		String userName;
+		String password;
+		
+		userName = scanner.nextLine();
+		System.out.println("Please enter your password: ");
+		password = scanner.nextLine();
+		
+		userNamePassword.add(userName);
+		userNamePassword.add(password);
+		return userNamePassword;
+	}
+	
+	public static ArrayList<String> checkLoginInfo(String utilisateur, String mdp, Map<String,String> mapUtilisateurs)
+	{
+		ArrayList<String> arrayList = new ArrayList();
+		if(mapUtilisateurs.containsKey(utilisateur))
+		{
+			if(mapUtilisateurs.get(utilisateur) == mdp)
+			{
+				arrayList.add(utilisateur);
+				arrayList.add(mdp);
+				return arrayList;
+			}
+			else
+			{
+				System.out.println("Le mot de passe est invalide.");
+				return arrayList;
+			}
+		}
+		else
+		{
+			arrayList.add(utilisateur);
+			arrayList.add(mdp);
+			return arrayList;
+		}
+	}
 }
+
