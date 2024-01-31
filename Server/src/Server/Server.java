@@ -3,9 +3,12 @@ import Verificateur.Verificateur;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.nio.file.*;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Scanner;
 import java.util.*;
 import java.io.File;
@@ -16,16 +19,22 @@ public class Server extends Verificateur {
 	private static String serverAddress = "127.0.0.1";
 	private static int serverPort = 5000;
 	private static Map <String, String> utilisateurs = new TreeMap<String, String>();
+	private static LimitedSizeQueue<String> messages = new LimitedSizeQueue(15);
 	
 	//Application Serveur
 	public static void main(String[] args) throws Exception {
 		//Compteur incrémenté à chaque connexion d'un client
 		int clientNumber = 0;
+		createFile("sauvegarde.txt");
+		createFile("utilisateurs.txt");		
+		FileWriter writerUtilisateurs = new FileWriter("utilisateurs.txt");
+		FileWriter writerMessages = new FileWriter("sauvegarde.txt");
 		
 		//Adresse et port du serveur 
 		
 		serverAddress = Verificateur.askStartAddress();
 		serverPort = Verificateur.askStartPort();
+		
 		
 		//Création de la connexion pour communiquer avec les clients
 		Listener = new ServerSocket();
@@ -48,40 +57,43 @@ public class Server extends Verificateur {
 		}
 		finally {
 			//Fermeture de la connexion
+			writerMessages.close();
+			writerUtilisateurs.close();
 			Listener.close();
-			
-			Runtime.getRuntime().addShutdownHook(new Thread()
-			{
-				public void sauvegarde()
-				{
-					try
-					{
-						File myObj = new File("sauvegarde.txt");
-						myObj.createNewFile();
-						FileWriter writer = new FileWriter("sauvegarde.txt");
-						if (myObj.createNewFile())
-						{
-							System.out.println("File created.");
-						}
-						else
-						{
-							System.out.println("File was not created");
-						}
-						
-						
-						for (Map.Entry<String, String> entry: utilisateurs.entrySet())
-						{
-							writer.write(entry.getKey() + ": " + entry.getValue() + "\n");
-						}
-						writer.close();
-					}
-					catch(IOException e)
-					{
-						System.out.println("Error occurred");
-					}	
-				}
-			});
 		}
 	}
 	
+	public static void sauvegarde(String write, FileWriter writer)
+	{
+		try
+		{
+			writer.write(write);
+			writer.write('\n');
+		}
+		catch(IOException e)
+		{
+			System.out.println("Error occurred");
+		}	
+	}
+	
+	public static void createFile(String name)
+	{
+		try
+		{
+			File f = new File(name);
+			if (f.createNewFile())
+			{
+				System.out.println("File created");
+			}
+			else
+			{
+				System.out.println("File not created");
+			}
+		}
+		catch(IOException e)
+		{
+			System.out.println("Error occurred");
+		}
+		
+	}
 }
