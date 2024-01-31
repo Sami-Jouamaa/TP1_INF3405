@@ -28,13 +28,14 @@ public class Client extends Verificateur {
 		
 		
 		//Création d'une nouvelle connexion avec le serveur
-		
 		System.out.format("Serveur lancé sur [%s:%d]", serverAddress, serverPort);
 		
 		//Création d'un canal entrant pour recevoir les messages envoyés par le serveur
 		DataInputStream in = new DataInputStream(socket.getInputStream());
 		
-		
+		//Attente de la réception d'un message envoyé par le serveur sur le canal
+		String helloMessageFromServer = in.readUTF();
+		System.out.println(helloMessageFromServer);
 		
 		Scanner scanner = new Scanner(System.in);
 		System.out.println("Enter the message you want to send to the server:");
@@ -42,10 +43,9 @@ public class Client extends Verificateur {
 		
 		out.writeUTF(userMessage); //Envoi de message
 		
-		//Attente de la réception d'un message envoyé par le serveur sur le canal
-		String helloMessageFromServer = in.readUTF();
-		System.out.println(helloMessageFromServer);
-		
+		String formattedMessage = in.readUTF();
+		System.out.println(formattedMessage);
+				
 		//fermeture de la connexion avec le serveur
 		socket.close();
 		scanner.close();
