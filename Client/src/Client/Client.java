@@ -26,7 +26,6 @@ public class Client extends Verificateur {
 		out.writeUTF(infoConnections.get(0));
 		out.writeUTF(infoConnections.get(1));
 		
-		
 		//Création d'une nouvelle connexion avec le serveur
 		System.out.format("Serveur lancé sur [%s:%d]", serverAddress, serverPort);
 		
