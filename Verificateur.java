@@ -1,10 +1,10 @@
 package Verificateur;
 
-import java.util.Scanner;
-import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.*;
 
 public class Verificateur {
+	
 	public static String askStartAddress()
 	{
 		boolean estValide = false;
@@ -95,28 +95,30 @@ public class Verificateur {
 		return userNamePassword;
 	}
 	
-	public static ArrayList<String> checkLoginInfo(String utilisateur, String mdp, Map<String,String> mapUtilisateurs)
+	public static Map<String, String> checkLoginInfo(String utilisateur, String mdp, Map<String, String> mapUtilisateurs)
 	{
-		ArrayList<String> arrayList = new ArrayList();
+		for (String key: mapUtilisateurs.keySet())
+		{
+			System.out.println(mapUtilisateurs.get(key));
+		}
+		
 		if(mapUtilisateurs.containsKey(utilisateur))
 		{
 			if(mapUtilisateurs.get(utilisateur) == mdp)
 			{
-				arrayList.add(utilisateur);
-				arrayList.add(mdp);
-				return arrayList;
+				return mapUtilisateurs;
 			}
 			else
 			{
 				System.out.println("Le mot de passe est invalide.");
-				return arrayList;
+				Map<String, String> emptyMap = new TreeMap<String, String>();
+				return emptyMap;
 			}
 		}
 		else
 		{
-			arrayList.add(utilisateur);
-			arrayList.add(mdp);
-			return arrayList;
+			mapUtilisateurs.put(utilisateur, mdp);
+			return mapUtilisateurs;
 		}
 	}
 }
