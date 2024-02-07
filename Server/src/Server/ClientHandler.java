@@ -1,127 +1,116 @@
 package Server;
 import Verificateur.Verificateur;
-import java.io.DataInputStream;
+import java.time.format.DateTimeFormatter; 
+import java.time.LocalDateTime;
 import java.io.DataOutputStream;
-import java.io.IOException;
-import java.nio.file.*;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.ServerSocket;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.Scanner;
-import java.util.*;
-import java.io.File;
+import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.BufferedReader;
+import java.io.DataInputStream;
+import java.io.IOException;
+import java.net.Socket;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 
-public class Server extends Verificateur {
-	public static int queueSize = 15;
-	public static ServerSocket Listener;
-	public static String serverAddress = "127.0.0.1";
-	public static int serverPort = 5000;
-	public static Map <String, String> utilisateurs = new TreeMap<String, String>();
-	public static LimitedSizeQueue<String> messages = new LimitedSizeQueue(queueSize);
-	public static FileWriter writerUtilisateurs;
+public class ClientHandler extends Thread{
+	private Socket socket;
+	private int clientNumber;
+	private Map<String, String> utilisateurs;
+	private static LimitedSizeQueue<String> messages;
+	private static int queueSize = 15;
 	
-	//Application Serveur
-	public static void main(String[] args) throws Exception {
-		int clientNumber = 0;
-		createFile("sauvegarde.txt");
-		createFile("utilisateurs.txt");		
-		
-		//Compteur incrémenté à chaque connexion d'un client
-		
-		//messages.add("anisdfnisadngfidng");
-		//messages.add("salsatidkgmjfkgmnfknhfkhnfkhnkhnfkh");
-		//utilisateurs.put("Patrice",  "1234");
-		
-		Runtime.getRuntime().addShutdownHook(new Thread(){
-				public void run()
-				{
-					System.out.println("Shutdown hook is running");
-					System.out.println(messages.get(0));
-					try {
-						FileWriter writerUtilisateurs = new FileWriter("utilisateurs.txt");
-						FileWriter writerMessages = new FileWriter("sauvegarde.txt");
-						
-						for (String key : utilisateurs.keySet())
-						{
-							writerUtilisateurs.write(key + '\t' + utilisateurs.get(key) + '\n');
-						}
-						
-						for (int i = 0; i < messages.size(); i++) 
-						{
-							writerMessages.write(messages.get(i) + '\n');
-							
-						}
-						writerUtilisateurs.close();
-						writerMessages.close();
-					
-					} catch (IOException e1) {
-						e1.printStackTrace();
-					}
-				}
-			});
-		
-		//Adresse et port du serveur 
-		serverAddress = Verificateur.askStartAddress();
-		serverPort = Verificateur.askStartPort();
-		
-		//Création de la connexion pour communiquer avec les clients
-		Listener = new ServerSocket();
-		Listener.setReuseAddress(true);
-		InetAddress serverIP = InetAddress.getByName(serverAddress);
-		
-		//Association de l'adresse et du port à la connexion
-		Listener.bind(new InetSocketAddress(serverIP, serverPort));
-		System.out.format("The server is running on %s:%d%n", serverAddress, serverPort);
-		
+	public ClientHandler(Socket socket, int clientNumber) {
+		this.socket = socket;
+		this.clientNumber = clientNumber;
+		this.utilisateurs = new TreeMap<String, String>();
+		this.messages = recupererHistorique();
+		System.out.println("New connection with client#" + clientNumber + "at" + socket);
+	}
+	
+	public void run() {
+		//Création de thread qui envoit un message à un client
 		try {
-			//À chaque fois qu'un nouveau client se connecte, on exécute la fonction
-			//run() de l'objet ClientHandler
+			DataOutputStream out = new DataOutputStream(socket.getOutputStream()); //Création de canal d'envoi
+			DataInputStream in = new DataInputStream(socket.getInputStream());
 			
-			while(true) {
-				//Important: la fonction accept() est bloquante: on attend qu'un prochain client se connecte
-				//On incrémente clientNumber à chaque nouvelle connexion
+			
+			String userName = in.readUTF();
+			String password = in.readUTF();
+			System.out.println(password);
+			
+			Map <String, String> tempMapCheckInfo = new TreeMap<String, String>();
+			tempMapCheckInfo = Verificateur.checkLoginInfo(userName, password, utilisateurs);
+			
+			if(tempMapCheckInfo.size() > 0)
+			{
+				utilisateurs = tempMapCheckInfo;
 				
-				new ClientHandler(Listener.accept(), clientNumber++).start();
+				System.out.println(Verificateur.checkLoginInfo(userName, password, utilisateurs));
+				Server.addUserInfoToTree(userName, password);
+				
+				out.writeUTF("Hello from server - you are client#" + clientNumber); //Envoi de message
+				//out.writeUTF();
+				
+				String adresseClient = socket.getInetAddress().toString();
+				String messageFromClient = in.readUTF();
+				int portClient = socket.getPort();
+				
+				out.writeUTF(assemblerMessage(userName, adresseClient, portClient, messageFromClient));
 			}
+			
+		}
+		catch(IOException e){
+			System.out.println("Error handling client#" + clientNumber + ":" + e);
 		}
 		finally {
-			//Fermeture de la connexion
-			Listener.close();
-		}
-	}
-	
-	public static void createFile(String name)
-	{
-		try
-		{
-			File f = new File(name);
-			if (f.createNewFile())
-			{
-				System.out.println("File created");
+			try {
+				socket.close();
 			}
-			else
-			{
-				System.out.println("File not created");
+			catch(IOException e) {
+				System.out.println("Couldn't close a socket, what's going on?");
 			}
+			System.out.println("Connection with client#" + clientNumber + "closed");
 		}
-		catch(IOException e)
-		{
-			System.out.println("Error occurred");
-		}
-		
 	}
 	
-	public static void addToQueue(String message)
+	public static String getDate(){
+        LocalDateTime d = LocalDateTime.now();
+        
+        DateTimeFormatter formateur = DateTimeFormatter.ofPattern("dd-MM-yyyy'@'HH:mm:ss");
+        String dateFormatee = d.format(formateur);
+      //adapte de https://www.w3schools.com/java/java_date.asp
+        return dateFormatee;   
+    }
+
+
+	public static String assemblerMessage(String utilisateur, String adresse, int port, String message)
 	{
-		messages.add(message);
+	    String portString = String.valueOf(port);
+	    String date = getDate();
+	    String messageComplet = "[" + utilisateur+"-"+adresse+":"+portString+"-"+date+"]:"+message;
+		Server.addToQueue(messageComplet);
+	    return messageComplet;
 	}
 	
-	public static void addUserInfoToTree(String username, String password)
+	public LimitedSizeQueue<String> recupererHistorique()
 	{
-		utilisateurs.put(username, password);
+		  // Specifier le chemin au fichier
+        String filePath = "./sauvegarde.txt"; // mettre chemin du fichier
+        
+        LimitedSizeQueue<String> messages = new LimitedSizeQueue<>(15);
+        
+        try (BufferedReader bufferedReader = new BufferedReader(new FileReader(filePath))) {
+            String line;
+            while ((line = bufferedReader.readLine()) != null) {
+            	messages.add(line);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return messages;
 	}
 }
+
 
