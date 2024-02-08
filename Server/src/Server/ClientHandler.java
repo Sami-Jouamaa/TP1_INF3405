@@ -24,7 +24,7 @@ public class ClientHandler extends Thread{
 	public ClientHandler(Socket socket, int clientNumber) {
 		this.socket = socket;
 		this.clientNumber = clientNumber;
-		this.utilisateurs = new TreeMap<String, String>();
+		//this.utilisateurs = new TreeMap<String, String>();
 		this.messages = recupererHistorique();
 		System.out.println("New connection with client#" + clientNumber + "at" + socket);
 	}
@@ -35,19 +35,18 @@ public class ClientHandler extends Thread{
 			DataOutputStream out = new DataOutputStream(socket.getOutputStream()); //Création de canal d'envoi
 			DataInputStream in = new DataInputStream(socket.getInputStream());
 			
-			
 			String userName = in.readUTF();
 			String password = in.readUTF();
 			System.out.println(password);
 			
 			Map <String, String> tempMapCheckInfo = new TreeMap<String, String>();
-			tempMapCheckInfo = Verificateur.checkLoginInfo(userName, password, utilisateurs);
+			tempMapCheckInfo = Verificateur.checkLoginInfo(userName, password, Server.utilisateurs);
 			
 			if(tempMapCheckInfo.size() > 0)
 			{
-				utilisateurs = tempMapCheckInfo;
+				Server.utilisateurs = tempMapCheckInfo;
 				
-				System.out.println(Verificateur.checkLoginInfo(userName, password, utilisateurs));
+				System.out.println(Verificateur.checkLoginInfo(userName, password, Server.utilisateurs));
 				Server.addUserInfoToTree(userName, password);
 				
 				out.writeUTF("Hello from server - you are client#" + clientNumber); //Envoi de message
@@ -112,5 +111,4 @@ public class ClientHandler extends Thread{
         return messages;
 	}
 }
-
 
