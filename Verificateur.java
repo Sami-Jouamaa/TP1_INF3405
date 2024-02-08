@@ -104,7 +104,7 @@ public class Verificateur {
 		
 		if(mapUtilisateurs.containsKey(utilisateur))
 		{
-			if(mapUtilisateurs.get(utilisateur) == mdp)
+			if(mapUtilisateurs.get(utilisateur).equals(mdp))
 			{
 				return mapUtilisateurs;
 			}
@@ -122,4 +122,3 @@ public class Verificateur {
 		}
 	}
 }
-
