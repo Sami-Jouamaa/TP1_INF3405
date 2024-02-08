@@ -22,32 +22,34 @@ public class Client extends Verificateur {
 		infoConnections = Verificateur.askLoginInfo();
 		
 		DataOutputStream out = new DataOutputStream(socket.getOutputStream()); //Création de canal d'envoi
+		DataInputStream in = new DataInputStream(socket.getInputStream());
 		
 		out.writeUTF(infoConnections.get(0));
 		out.writeUTF(infoConnections.get(1));
 		
 		//Création d'une nouvelle connexion avec le serveur
+		
 		System.out.format("Serveur lancé sur [%s:%d]", serverAddress, serverPort);
 		
-		//Création d'un canal entrant pour recevoir les messages envoyés par le serveur
-		DataInputStream in = new DataInputStream(socket.getInputStream());
-		
-		//Attente de la réception d'un message envoyé par le serveur sur le canal
 		String helloMessageFromServer = in.readUTF();
 		System.out.println(helloMessageFromServer);
 		
 		Scanner scanner = new Scanner(System.in);
 		System.out.println("Enter the message you want to send to the server:");
 		String userMessage = scanner.nextLine();
-		
+			
 		out.writeUTF(userMessage); //Envoi de message
-		
+			
 		String formattedMessage = in.readUTF();
 		System.out.println(formattedMessage);
 				
 		//fermeture de la connexion avec le serveur
 		socket.close();
 		scanner.close();
+		//Création d'un canal entrant pour recevoir les messages envoyés par le serveur
+		
+		//Attente de la réception d'un message envoyé par le serveur sur le canal
+		
 		
 	}
 }
