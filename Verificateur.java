@@ -66,7 +66,6 @@ public class Verificateur {
 		do {
 			System.out.println("Entrez le port d'écoute du poste sur laquelle s'effectue le serveur:");
 			
-			
 			String portServeurEntre = scanner.nextLine();
 			
 			portServeur = Integer.parseInt(portServeurEntre);
@@ -96,17 +95,12 @@ public class Verificateur {
 	}
 	
 	public static Map<String, String> checkLoginInfo(String utilisateur, String mdp, Map<String, String> mapUtilisateurs)
-	{
-		for (String key: mapUtilisateurs.keySet())
-		{
-			System.out.println(mapUtilisateurs.get(key));
-		}
-		
+	{	
 		if(mapUtilisateurs.containsKey(utilisateur))
 		{
 			if(mapUtilisateurs.get(utilisateur).equals(mdp))
 			{
-				return mapUtilisateurs;
+				return mapUtilisateurs;//bon mot de passe entré
 			}
 			else
 			{
@@ -115,7 +109,7 @@ public class Verificateur {
 				return emptyMap;
 			}
 		}
-		else
+		else//nouvel utilisateur ajouté
 		{
 			mapUtilisateurs.put(utilisateur, mdp);
 			return mapUtilisateurs;
