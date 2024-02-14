@@ -13,6 +13,7 @@ public class ServerHandler extends Thread {
 	
 	public void run()
 	{
+		//Chaque client imprime les messages de tous les autres clients au fur et à mesure qu'ils en écrivent
 		while(true)
 		{
 			try {
