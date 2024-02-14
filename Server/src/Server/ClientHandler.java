@@ -102,7 +102,16 @@ public class ClientHandler extends Thread{
 		//Formattage des messages avant l'envoi aux autres clients
 	    String portString = String.valueOf(port);
 	    String date = getDate();
-	    String messageComplet = "[" + utilisateur+"-"+adresse+":"+portString+"-"+date+"]:"+message.substring(0, 200);
+	    String messageComplet;
+	    
+	    if (message.length() > 200)
+	    {
+	    	messageComplet = "[" + utilisateur+"-"+adresse+":"+portString+"-"+date+"]:"+message.substring(0, 200);
+	    }
+	    else
+	    {
+	    	messageComplet = "[" + utilisateur+"-"+adresse+":"+portString+"-"+date+"]:"+message;
+	    }
 		Server.messages.add(messageComplet);
 	    return messageComplet;
 	}
