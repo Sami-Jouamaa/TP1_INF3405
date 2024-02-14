@@ -100,7 +100,6 @@ public class Verificateur {
 			}	
 		}while(!portEstValide);
 		portServeur = Integer.parseInt(portServeurEntre); //Transformation d'une string en un int pour l'attribut serverPort du client si le port est correct
-		scanner.close();
 		return portServeur;
 	}
 	
@@ -118,9 +117,10 @@ public class Verificateur {
 		System.out.println("Please enter your password: ");
 		password = scanner.nextLine();
 		
-		//Ajout à l'arrayList pour un utilisateur qui sera ajouté à la map du serveur si la connexion est bien établie
+		//Ajoute à l'arrayList pour un utilisateur qui sera ajouté à la map du serveur si la connexion est bien établie
 		userNamePassword.add(userName);
 		userNamePassword.add(password);
+		
 		return userNamePassword;
 	}
 	
