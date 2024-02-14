@@ -55,8 +55,8 @@ public class Client extends Verificateur {
 				if (userMessage.equals("EXIT"))
 				{
 					///Fermeture de la connexion du client au serveur
-					socket.close();
 					scanner.close();
+					socket.close();
 					System.exit(0);
 					break;
 				}
