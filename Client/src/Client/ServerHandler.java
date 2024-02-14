@@ -20,7 +20,7 @@ public class ServerHandler extends Thread {
 				String formattedMessage = in.readUTF();
 				System.out.println(formattedMessage);
 			} catch (IOException e) {
-				e.printStackTrace();
+				continue;
 			}
 		}
 	}
