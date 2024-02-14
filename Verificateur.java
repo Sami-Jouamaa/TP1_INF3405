@@ -1,12 +1,10 @@
 package Verificateur;
-
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.*;
 
 public class Verificateur {
-	
 	public static String askStartAddress()
 	{
+		//Vérification de l'adresse aussi, que le format soit bon et qu'il n'y ait pas de symboles autres que des chiffres
 		boolean estValide = false;
 		String adresseIPEntree;
 		Scanner scanner = new Scanner(System.in);
@@ -15,6 +13,7 @@ public class Verificateur {
 			System.out.println("Entrez l'adresse IP du poste sur laquelle s'effectue le serveur:");
 			adresseIPEntree = scanner.nextLine();
 			
+			boolean alternancePointNumber = false;
 			int pointCounter = 0;
 			int numberCounter = 1;
 			if (adresseIPEntree.length() >= 7 || adresseIPEntree.length() <= 15)
@@ -23,11 +22,16 @@ public class Verificateur {
 				{
 					if (adresseIPEntree.charAt(i) == '.')
 					{
-						pointCounter += 1;
-						numberCounter += 1;
+						if (alternancePointNumber)
+						{
+							pointCounter += 1;
+							numberCounter += 1;
+							alternancePointNumber = !(alternancePointNumber);
+						}
 					}
 					else if (adresseIPEntree.charAt(i) >= '0' && adresseIPEntree.charAt(i) <= '9')
 					{
+						alternancePointNumber = true;
 						continue;
 					}
 					else
@@ -51,44 +55,70 @@ public class Verificateur {
 			else
 			{
 				System.out.println("L'adresse IP n'est pas valide.");
+				System.out.println(pointCounter + "" + numberCounter + '\n');
 				estValide = false;
 			}		
 		}while(!(estValide));
 		
 		return adresseIPEntree;
-		
 	}
 	
 	public static int askStartPort()
 	{
+		//Vérification du numéro de port pour qu'il soit entre 5000 et 5050 et qu'il n'ait pas de symboles qui ne sont pas des chiffres
+		boolean portEstValide = false;
 		int portServeur = 0;
 		Scanner scanner = new Scanner(System.in);
+		String portServeurEntre;
+		
 		do {
 			System.out.println("Entrez le port d'écoute du poste sur laquelle s'effectue le serveur:");
 			
-			String portServeurEntre = scanner.nextLine();
+			portServeurEntre = scanner.nextLine();
 			
-			portServeur = Integer.parseInt(portServeurEntre);
-		}while(!(portServeur >= 5000 && portServeur <= 5050));
-		
-		System.out.println("Le port est correct");
+			if (portServeurEntre.charAt(0) == '5' && portServeurEntre.charAt(1) == '0' && portServeurEntre.length() == 4)
+			{
+				if (portServeurEntre.charAt(2) == '5')
+				{
+					if (portServeurEntre.charAt(3) == '0')
+					{
+						portEstValide = true;
+					}
+				}
+				else if (portServeurEntre.charAt(2) >= '0' && portServeurEntre.charAt(2) <= '4')
+				{
+					if (portServeurEntre.charAt(3) >= '0' && portServeurEntre.charAt(3) <= '9')
+					{
+						portEstValide = true;
+					}
+				}
+			}
+			else
+			{
+				System.out.println("Écrivez un nombre entre 5000 et 5050");
+				portEstValide = false;
+			}	
+		}while(!portEstValide);
+		portServeur = Integer.parseInt(portServeurEntre); //Transformation d'une string en un int pour l'attribut serverPort du client si le port est correct
+		scanner.close();
 		return portServeur;
-
 	}
 	
 	public static ArrayList<String> askLoginInfo()
 	{
-		ArrayList<String> userNamePassword = new ArrayList<>();
-		
-		Scanner scanner = new Scanner(System.in);
-		System.out.println("Please enter your username: ");
+		//Pas de vérification, seulement la collecte des informations d'un client
+		ArrayList<String> userNamePassword = new ArrayList<>();//ArrayList que le Clienthandler recevra
 		String userName;
 		String password;
+		Scanner scanner = new Scanner(System.in);
 		
+		System.out.println("Please enter your username: ");
 		userName = scanner.nextLine();
+		
 		System.out.println("Please enter your password: ");
 		password = scanner.nextLine();
 		
+		//Ajout à l'arrayList pour un utilisateur qui sera ajouté à la map du serveur si la connexion est bien établie
 		userNamePassword.add(userName);
 		userNamePassword.add(password);
 		return userNamePassword;
@@ -96,6 +126,8 @@ public class Verificateur {
 	
 	public static Map<String, String> checkLoginInfo(String utilisateur, String mdp, Map<String, String> mapUtilisateurs)
 	{	
+		//Si le nom d'utilisateur n'existe pas, on l'ajoute à la map de serveur
+		//Si le nom d'utilisateur existe mais le mot de passe est mauvais, on imprime un message et on renvoie une map vide
 		if(mapUtilisateurs.containsKey(utilisateur))
 		{
 			if(mapUtilisateurs.get(utilisateur).equals(mdp))
