@@ -101,6 +101,7 @@ public class Server extends Verificateur {
 		{
 			System.out.println("Error occurred");
 		}
+		
 	}
 }
 
