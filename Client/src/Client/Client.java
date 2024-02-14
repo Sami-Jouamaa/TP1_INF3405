@@ -3,6 +3,7 @@ import Verificateur.Verificateur;
 import java.io.DataInputStream;
 import java.util.Scanner;
 import java.io.DataOutputStream;
+import java.io.IOException;
 import java.net.Socket;
 import java.util.ArrayList;
 
@@ -29,27 +30,47 @@ public class Client extends Verificateur {
 		
 		//Création d'une nouvelle connexion avec le serveur
 		
-		System.out.format("Serveur lancé sur [%s:%d]", serverAddress, serverPort);
+		System.out.format("Serveur lancé sur [%s:%d] \n", serverAddress, serverPort);
 		
 		String helloMessageFromServer = in.readUTF();
 		System.out.println(helloMessageFromServer);
 		
 		Scanner scanner = new Scanner(System.in);
-		System.out.println("Enter the message you want to send to the server:");
-		String userMessage = scanner.nextLine();
-			
-		out.writeUTF(userMessage); //Envoi de message
-			
-		String formattedMessage = in.readUTF();
-		System.out.println(formattedMessage);
-				
-		//fermeture de la connexion avec le serveur
-		socket.close();
-		scanner.close();
-		//Création d'un canal entrant pour recevoir les messages envoyés par le serveur
 		
-		//Attente de la réception d'un message envoyé par le serveur sur le canal
+		System.out.println(in.readUTF());
+		//do {
+			//tempMessage = in.readUTF();
+			//System.out.println(tempMessage);
+		//}while(tempMessage != "");
 		
+		System.out.println("Type EXIT to leave the chatroom");
+		System.out.println("Enter the message you want to send to the server: \n");
+		String userMessage = "";
 		
+		new ServerHandler(in).start();
+		
+		while (true)
+		{
+			try
+			{
+				userMessage = scanner.nextLine();
+				if (userMessage.equals("EXIT"))
+				{
+					socket.close();
+					scanner.close();
+					System.exit(0);
+					break;
+				}
+				else
+				{
+					out.writeUTF(userMessage); //Envoi de message
+
+				}
+			}
+			catch(IOException e)
+			{
+				System.out.println("Connection terminated");
+			}
+		}
 	}
 }
