@@ -8,6 +8,7 @@ import java.io.FileWriter;
 import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.IOException;
+import java.net.ServerSocket;
 import java.net.Socket;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -39,26 +40,39 @@ public class ClientHandler extends Thread{
 			String password = in.readUTF();
 			System.out.println(password);
 			
-			Map <String, String> tempMapCheckInfo = new TreeMap<String, String>();
+			Map <String, String> tempMapCheckInfo = new TreeMap<String, String>();//
 			tempMapCheckInfo = Verificateur.checkLoginInfo(userName, password, Server.utilisateurs);
 			
-			if(tempMapCheckInfo.size() > 0)
+			if(tempMapCheckInfo.size() > 0)//Début de l'accès à la salle de clavardage pour le client
 			{
-				Server.utilisateurs = tempMapCheckInfo;
+				Server.utilisateurs = tempMapCheckInfo; // nouvel utilisateur apparaît alors dans les données du serveur
 				
-				System.out.println(Verificateur.checkLoginInfo(userName, password, Server.utilisateurs));
-				Server.addUserInfoToTree(userName, password);
+				//Server.addUserInfoToTree(userName, password); à enlever
+				Server.tempSocketsList.add(out);
 				
-				out.writeUTF("Hello from server - you are client#" + clientNumber); //Envoi de message
-				//out.writeUTF();
+				out.writeUTF("Hello from server - you are client#" + clientNumber + '\n'); //Envoi de message
 				
+				afficherHistorique(out);
+				
+				//Stockage des informations du client
 				String adresseClient = socket.getInetAddress().toString();
-				String messageFromClient = in.readUTF();
+				String messageFromClient;
 				int portClient = socket.getPort();
 				
-				out.writeUTF(assemblerMessage(userName, adresseClient, portClient, messageFromClient));
+				String nouveauMessageFromClient = "";
+				//Début du clavardage
+				do {
+					nouveauMessageFromClient = in.readUTF();
+					if (nouveauMessageFromClient.equals("EXIT"))
+					{
+						socket.close();
+						break;
+					}
+					
+					String messageFormatte = assemblerMessage(userName, adresseClient, portClient, nouveauMessageFromClient);
+					broadcastMessages(messageFormatte);
+				}while(true);
 			}
-			
 		}
 		catch(IOException e){
 			System.out.println("Error handling client#" + clientNumber + ":" + e);
@@ -109,6 +123,33 @@ public class ClientHandler extends Thread{
             e.printStackTrace();
         }
         return messages;
+	}
+	
+	public void afficherHistorique(DataOutputStream out)
+	{
+		try {
+			String quinzeDerniersMessages = "";
+			Server.messages = recupererHistorique();
+			for (int i = 0; i < Server.messages.size(); i++)
+			{
+				quinzeDerniersMessages += Server.messages.get(i) + '\n';
+			}
+			out.writeUTF(quinzeDerniersMessages);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+	}
+	
+	public void broadcastMessages(String messageFormatte)
+	{
+		for (DataOutputStream out: Server.tempSocketsList)
+		{
+			try {
+				out.writeUTF(messageFormatte);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 }
 
