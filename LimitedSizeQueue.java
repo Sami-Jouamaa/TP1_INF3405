@@ -1,6 +1,5 @@
 package Server;
 import java.util.LinkedList;
-import java.util.Queue;
 
 public class LimitedSizeQueue<E> //classe reprise de https://www.geeksforgeeks.org/how-to-implement-size-limited-queue-that-holds-last-n-elements-in-java/
 extends LinkedList<E> { 
