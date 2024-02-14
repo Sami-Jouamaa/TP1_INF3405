@@ -31,5 +31,13 @@ extends LinkedList<E> {
 		} 
 		super.add(o); 
 		return true; 
-	} 
+	}
+	
+	public void afficherQueue()
+	{
+		for (int i = 0; i < SizeLimitOfQueue; i++)
+		{
+			System.out.println(this.get(i));
+		}
+	}
 }
